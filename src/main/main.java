@@ -1,5 +1,6 @@
 package main;
 import timeManager.*;
+import window.Window;
 
 public class main {
 
@@ -22,7 +23,7 @@ public class main {
 //		timeManager.saveToFile();
 //		System.out.println(timeManager.getPlan(10));
 		
-		
+		new Window("时间管理器 - By PenG", timeManager);
 		
 		System.out.println("Done!");
 	}
