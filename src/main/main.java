@@ -5,8 +5,8 @@ import window.Window;
 public class main {
 
 	public static void main(String[] args) {
-		TimeManager timeManager = new TimeManager("a.json");
-		
+//		TimeManager timeManager = new TimeManager("a.json");
+//	
 //		timeManager.setPlan(0, "Python");
 //		timeManager.setPlan(1, "Java");
 //		timeManager.setPlan(5, "c");
@@ -23,7 +23,7 @@ public class main {
 //		timeManager.saveToFile();
 //		System.out.println(timeManager.getPlan(10));
 		
-		new Window("时间管理器 - By PenG", timeManager);
+		new Window("时间管理器 - By PenG", new TimeManager("a.json"));
 		
 		System.out.println("Done!");
 	}
