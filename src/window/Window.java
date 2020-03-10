@@ -22,6 +22,7 @@ import timeManager.TimeManager;
 public class Window extends JFrame {
 	public Window(String title, TimeManager timeManager) {
 		this.timeManager = timeManager;
+		this.planEditWindow = new PlanEditWindow("Edit plan");
 		this.timeManager.readFromFile();
 		
 		this.setTitle(title);
@@ -63,7 +64,9 @@ public class Window extends JFrame {
 		
 		// 计划
 		for (int i=0; i<7*24; i++) {
-			planMap.put(i * 8 + 9 + (i/8), this.timeManager.getPlan(i));
+			int row = (i / 7) + 1;
+			int column = (i % 7) + 1;
+			planMap.put(row * 8 + column, this.timeManager.getPlan(i));
 		}
 		
 		// 画组件
@@ -72,7 +75,7 @@ public class Window extends JFrame {
 			button.setName(String.valueOf(i));
 			button.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					System.out.println(button.getName());
+					planPress(button.getName(), button);
 				}
 			});
 			this.add(button);
@@ -85,5 +88,25 @@ public class Window extends JFrame {
 		System.exit(0);
 	}
 	
+	private void planPress(String name, JButton button) {
+		int number = Integer.valueOf(name);
+		int row = number / 8 - 1;
+		int column = number % 8 - 1;
+		if (row < 0 || column < 0) {
+			System.out.println("not plan table");
+			return;
+		}
+		int time = row * 7 + column;
+		this.planEditWindow.setPlan(this.timeManager.getPlan(time));
+		
+		this.planEditWindow.setVisible(true);
+		
+		// 写完计划后就获取计划
+		String newPlan =  this.planEditWindow.getPlan();
+		this.timeManager.setPlan(time, newPlan);
+		button.setText(this.timeManager.getPlan(time));
+	}
+	
 	private TimeManager timeManager;
+	private PlanEditWindow planEditWindow;
 }
