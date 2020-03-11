@@ -23,9 +23,7 @@ public class main {
 //		timeManager.saveToFile();
 //		System.out.println(timeManager.getPlan(10));
 		
-		new Window("时间管理器 - By PenG", new TimeManager("a.json"));
-		
-		System.out.println("Done!");
+		new Window("TimeManager - By PenG", new TimeManager("a.json"));
 	}
 
 }

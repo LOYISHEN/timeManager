@@ -3,6 +3,8 @@ package window;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -18,13 +20,19 @@ public class PlanEditWindow extends JDialog{
 		
 		this.paintContent();
 		
+		this.addWindowListener(new WindowAdapter() {
+			// 设置窗口显示后就focus到textarea，然后选中所有文字
+			public void windowActivated(WindowEvent e) {
+				textArea.setFocusable(true);
+				textArea.selectAll();
+			}
+		});
+		
 		GUITools.center(this);
 		this.setVisible(false);
 	}
 	
 	private void paintContent() {
-		this.textArea = new JTextArea();
-		this.add(textArea, BorderLayout.CENTER);
 		JButton submitButton = new JButton("确定");
 		submitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -32,6 +40,9 @@ public class PlanEditWindow extends JDialog{
 			}
 		});
 		this.add(submitButton, BorderLayout.SOUTH);
+		
+		this.textArea = new JTextArea();
+		this.add(textArea, BorderLayout.CENTER);
 	}
 	
 	private void submit() {
@@ -45,7 +56,6 @@ public class PlanEditWindow extends JDialog{
 	public void setPlan(String plan) {
 		this.textArea.setText(plan);
 		this.plan = plan;
-		this.textArea.setFocusable(true);
 	}
 	
 	public String getPlan() {

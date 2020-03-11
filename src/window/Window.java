@@ -105,6 +105,8 @@ public class Window extends JFrame {
 		String newPlan =  this.planEditWindow.getPlan();
 		this.timeManager.setPlan(time, newPlan);
 		button.setText(this.timeManager.getPlan(time));
+		// 保存计划
+		timeManager.saveToFile();
 	}
 	
 	private TimeManager timeManager;
