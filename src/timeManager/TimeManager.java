@@ -1,5 +1,7 @@
 package timeManager;
 
+import java.util.Map;
+
 public class TimeManager {
 	// filename 为保存到的文件名
 	public TimeManager(String filename) {
@@ -23,12 +25,21 @@ public class TimeManager {
 	
 	// 保存计划到文件中
 	public void saveToFile() {
-		fileSaver.save(this.table);
+		if (!this.fileSaver.save(this.table)) {
+			System.out.println(this.fileSaver.getErrorString());
+		}
 	}
 	
 	// 从文件中读取计划
 	public void readFromFile() {
-		this.table.setAllPlan(fileSaver.read());
+		Map<String, String> planMap = this.fileSaver.read();
+		if (null == planMap) {
+			System.out.println(this.fileSaver.getErrorString());
+			this.saveToFile();
+			planMap = this.fileSaver.read();
+			return;
+		}
+		this.table.setAllPlan(planMap);
 	}
 	
 	// 输出计划列表，调试用

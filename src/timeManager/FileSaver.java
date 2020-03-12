@@ -103,10 +103,16 @@ public class FileSaver {
 		} catch (UnsupportedEncodingException e) {
 			this.setErrorString("unsupported encoding exception, FileSaver.java:read()");
 			System.out.println("unsupported encoding exception, FileSaver.java:read()");
+			return null;
 		}
 		
 		JSONObject jsonObject = JSONObject.fromObject(string);
 		jsonObject = jsonObject.getJSONObject("table");
+		
+		if ("null".equals(jsonObject.toString())) {
+			this.setErrorString("Failed to read table object!");
+			return null;
+		}
 		
 		String key = new String();
 		String value = new String();

@@ -1,21 +1,29 @@
 package window;
 
-import java.awt.Button;
+import java.awt.AWTException;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 import timeManager.TimeManager;
 
@@ -24,12 +32,72 @@ public class Window extends JFrame {
 		this.timeManager = timeManager;
 		this.planEditWindow = new PlanEditWindow("Edit plan");
 		this.timeManager.readFromFile();
+		ImageIcon icon = new ImageIcon("icon.png");
+		Image image = icon.getImage();
+		this.setIconImage(image);
+		
+		if (SystemTray.isSupported()) {
+			SystemTray tray = SystemTray.getSystemTray();
+			TrayIcon trayIcon = new TrayIcon(image, "TimeManager");
+			trayIcon.setImageAutoSize(true);
+			PopupMenu menu = new PopupMenu();
+			MenuItem exitMenuItem = new MenuItem("exit");
+			exitMenuItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("exit");
+					exit();
+				}
+			});
+			menu.add(exitMenuItem);
+			trayIcon.setPopupMenu(menu);
+			try {
+				tray.add(trayIcon);
+			} catch (AWTException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			trayIcon.addMouseListener(new MouseListener() {
+				public void mouseReleased(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mousePressed(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mouseExited(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if (e.getButton() == MouseEvent.BUTTON1) {
+						setVisible(true);
+					}
+					if (e.getButton() == MouseEvent.BUTTON2) {
+						Runnable popupWindowRunnable = new PopupWindow("", 3000);
+						new Thread(popupWindowRunnable).start();
+					}
+				}
+			});
+		}
 		
 		this.setTitle(title);
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				exit();
+				setVisible(false);
 			}
 		});
 		this.setMinimumSize(new Dimension(1350, 750));
