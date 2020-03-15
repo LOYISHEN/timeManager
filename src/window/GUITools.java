@@ -1,4 +1,5 @@
 package window;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Insets;
 import java.awt.Toolkit;
@@ -20,5 +21,39 @@ public class GUITools {
 		int x = kToolkit.getScreenSize().width - component.getWidth();
 		int y = kToolkit.getScreenSize().height - component.getHeight() - taskBarHeight;
 		component.setLocation(x, y);
+	}
+	
+	// 透明渐入
+	public static void fadeIn(Component component, int milisecond) {
+		Color color = component.getBackground();
+		if (milisecond < 0) {
+			return;
+		}
+		for (int i=0; i<milisecond; i++) {
+			try {
+				Thread.sleep(1);
+				component.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), i*255/milisecond));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	// 透明渐出
+	public static void fadeOut(Component component, int milisecond) {
+		Color color = component.getBackground();
+		if (milisecond < 0) {
+			return;
+		}
+		for (int i=milisecond; i>0; i--) {
+			try {
+				Thread.sleep(1);
+				component.setBackground(new Color(color.getRed(), color.getGreen(), color.getBlue(), i*255/milisecond));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }

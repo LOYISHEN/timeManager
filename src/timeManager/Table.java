@@ -13,28 +13,28 @@ public class Table {
 	}
 	
 	// 写一个计划，假如计划表中已经有该时间的计划，则覆盖原有计划
-	public void setPlan(int time, String plan) {
+	public void setPlan(PlanTime planTime, String plan) {
 		Iterator<Plan> iterator = this.plan.iterator();
 		while (iterator.hasNext()) {
 			Plan p = iterator.next();
-			if (p.getTime() == time) {
-				p.setPlan(time, plan);
+			if (p.getTime().equals(planTime)) {
+				p.setPlan(planTime, plan);
 				return;
 			}
 		}
 		
-		this.plan.add(new Plan(time, plan));
+		this.plan.add(new Plan(planTime, plan));
 		return;
 	}
 	
 	// 获取一个计划
-	public String getPlan(int time) {
+	public String getPlan(PlanTime planTime) {
 		String plan = new String();
 		
 		Iterator<Plan> iterator = this.plan.iterator();
 		while (iterator.hasNext()) {
 			Plan p = iterator.next();
-			if (p.getTime() == time) {
+			if (p.getTime().equals(planTime)) {
 				plan = p.getPlan();
 				break;
 			}
@@ -44,22 +44,22 @@ public class Table {
 	}
 	
 	// 获取所有的计划
-	public Map<String, String> getAllPlan() {		
-		Map<String, String> planMap = new HashMap<String, String>();
+	public Map<PlanTime, String> getAllPlan() {		
+		Map<PlanTime, String> planMap = new HashMap<PlanTime, String>();
 
 		Iterator<Plan> iterator = this.plan.iterator();
 		while (iterator.hasNext()) {
 			Plan plan = iterator.next();
-			planMap.put(String.valueOf(plan.getTime()), plan.getPlan());
+			planMap.put(plan.getTime(), plan.getPlan());
 		}
 		
 		return planMap;
 	}
 	
 	// 批量加载计划
-	public void setAllPlan(Map<String, String> planMap) {
-		for (Map.Entry<String, String> entry : planMap.entrySet()) {
-			this.setPlan(Integer.valueOf(entry.getKey()), entry.getValue());
+	public void setAllPlan(Map<PlanTime, String> planMap) {
+		for (Map.Entry<PlanTime, String> entry : planMap.entrySet()) {
+			this.setPlan(entry.getKey(), entry.getValue());
 		}
 	}
 	

@@ -25,6 +25,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import timeManager.PlanTime;
 import timeManager.TimeManager;
 
 public class Window extends JFrame {
@@ -36,6 +37,29 @@ public class Window extends JFrame {
 		Image image = icon.getImage();
 		this.setIconImage(image);
 		
+		this.addSystemTray(image); // 系统托盘
+		
+		this.setTitle(title);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				setVisible(false);
+			}
+		});
+		this.setMinimumSize(new Dimension(1350, 750));
+		
+		this.paintContent();
+		
+		GUITools.center(this);
+		
+		this.setVisible(true);
+		
+		// 启动弹窗管理器
+		Runnable popupManagerRunnable = new PopupManager(this.timeManager);
+		new Thread(popupManagerRunnable).start();
+	}
+	
+	private void addSystemTray(Image image) {
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
 			TrayIcon trayIcon = new TrayIcon(image, "TimeManager");
@@ -85,28 +109,13 @@ public class Window extends JFrame {
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						setVisible(true);
 					}
+					// 下面这段用来测试的而已
 					if (e.getButton() == MouseEvent.BUTTON2) {
-						Runnable popupWindowRunnable = new PopupWindow("", 3000);
-						new Thread(popupWindowRunnable).start();
+						
 					}
 				}
 			});
 		}
-		
-		this.setTitle(title);
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		this.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				setVisible(false);
-			}
-		});
-		this.setMinimumSize(new Dimension(1350, 750));
-		
-		this.paintContent();
-		
-		GUITools.center(this);
-		
-		this.setVisible(true);
 	}
 	
 	private void paintContent() {
@@ -131,10 +140,16 @@ public class Window extends JFrame {
 		}
 		
 		// 计划
-		for (int i=0; i<7*24; i++) {
-			int row = (i / 7) + 1;
-			int column = (i % 7) + 1;
-			planMap.put(row * 8 + column, this.timeManager.getPlan(i));
+		int index;
+		String plan;
+		PlanTime planTime;
+		for (int row=0; row<24; row++) {
+			for (int column=0; column<7; column++) {
+				planTime = new PlanTime(column, row, 0);
+				index = (row + 1) * 8 + column + 1;
+				plan = this.timeManager.getPlan(planTime);
+				planMap.put(index, plan);
+			}
 		}
 		
 		// 画组件
@@ -164,15 +179,15 @@ public class Window extends JFrame {
 			System.out.println("not plan table");
 			return;
 		}
-		int time = row * 7 + column;
-		this.planEditWindow.setPlan(this.timeManager.getPlan(time));
+		PlanTime planTime = new PlanTime(column, row, 0);
+		this.planEditWindow.setPlan(this.timeManager.getPlan(planTime));
 		
 		this.planEditWindow.setVisible(true);
 		
 		// 写完计划后就获取计划
 		String newPlan =  this.planEditWindow.getPlan();
-		this.timeManager.setPlan(time, newPlan);
-		button.setText(this.timeManager.getPlan(time));
+		this.timeManager.setPlan(planTime, newPlan);
+		button.setText(this.timeManager.getPlan(planTime));
 		// 保存计划
 		timeManager.saveToFile();
 	}

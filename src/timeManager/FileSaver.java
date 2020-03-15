@@ -71,8 +71,8 @@ public class FileSaver {
 		return true;
 	}
 	
-	public Map<String, String> read() {
-		Map<String, String> planMap = new HashMap<String, String>();
+	public Map<PlanTime, String> read() {
+		Map<PlanTime, String> planMap = new HashMap<PlanTime, String>();
 		
 		File file = new File(this.filename);
 		FileInputStream fileInputStream;
@@ -106,7 +106,9 @@ public class FileSaver {
 			return null;
 		}
 		
+		// 从string中载入jsonObject
 		JSONObject jsonObject = JSONObject.fromObject(string);
+		// 从json中载入table对象
 		jsonObject = jsonObject.getJSONObject("table");
 		
 		if ("null".equals(jsonObject.toString())) {
@@ -118,9 +120,10 @@ public class FileSaver {
 		String value = new String();
 		for (Iterator<?> iterator = jsonObject.keys(); iterator.hasNext();) {
 			key = (String)iterator.next();
-			value = jsonObject.getString(key);
+			value = jsonObject.getString(key.toString());
 			
-			planMap.put(key, value);
+			System.out.println(key);
+			planMap.put(PlanTime.valueOf(key), value);
 		}
 		
 		return planMap;

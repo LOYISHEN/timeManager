@@ -10,16 +10,16 @@ public class TimeManager {
 	}
 	
 	// 根据时间获取计划
-	public String getPlan(int time) {
+	public String getPlan(PlanTime planTime) {
 		String plan = new String();
 		
-		plan = this.table.getPlan(time);
+		plan = this.table.getPlan(planTime);
 		
 		return plan;
 	}
 	
 	// 设置计划
-	public void setPlan(int time, String plan) {
+	public void setPlan(PlanTime time, String plan) {
 		this.table.setPlan(time, plan);
 	}
 	
@@ -32,7 +32,7 @@ public class TimeManager {
 	
 	// 从文件中读取计划
 	public void readFromFile() {
-		Map<String, String> planMap = this.fileSaver.read();
+		Map<PlanTime, String> planMap = this.fileSaver.read();
 		if (null == planMap) {
 			System.out.println(this.fileSaver.getErrorString());
 			this.saveToFile();

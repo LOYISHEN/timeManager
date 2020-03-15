@@ -3,21 +3,21 @@ package timeManager;
 // 计划
 public class Plan {
 	public Plan() {
-		this.time = -1;
+		this.planTime = new PlanTime();
 		this.planString = new String();
 	}
 	
-	public Plan(int time, String plan) {
-		this.setPlan(time, plan);
+	public Plan(PlanTime planTime, String plan) {
+		this.setPlan(planTime, plan);
 	}
 	
-	public void setPlan(int time, String plan) {
-		this.time = time;
+	public void setPlan(PlanTime planTime, String plan) {
+		this.planTime = planTime;
 		this.planString = plan;
 	}
 	
-	public int getTime() {
-		return this.time;
+	public PlanTime getTime() {
+		return this.planTime;
 	}
 	
 	public String getPlan() {
@@ -26,9 +26,9 @@ public class Plan {
 	
 	// 输出计划列表，调试用
 	public String toString() {
-		return String.valueOf(this.time) + ":" + this.planString;
+		return this.planTime.toString() + ":" + this.planString;
 	}
 	
-	private int time;
+	private PlanTime planTime;
 	private String planString;
 }
