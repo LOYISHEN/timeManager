@@ -1,11 +1,5 @@
 package window;
 
-import java.applet.Applet;
-import java.applet.AudioClip;
-import java.awt.HeadlessException;
-import java.io.File;
-import java.net.MalformedURLException;
-
 import timeManager.PlanTime;
 import timeManager.TimeManager;
 

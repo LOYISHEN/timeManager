@@ -1,15 +1,9 @@
 package window;
 
-import java.applet.Applet;
-import java.applet.AudioClip;
 import java.awt.Font;
-import java.awt.HeadlessException;
-import java.awt.TextArea;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 
 // 右下角弹窗
 public class PopupWindow extends JDialog implements Runnable {
@@ -27,10 +21,13 @@ public class PopupWindow extends JDialog implements Runnable {
 	}
 	
 	private void paintContent() {
-		TextArea textArea = new TextArea();
-		textArea.setFont(new Font("宋体", Font.PLAIN, 40));
-		textArea.setText(this.message);
-		this.add(textArea);
+		JLabel label = new JLabel();
+		label.setFont(new Font("宋体", Font.PLAIN, 40));
+		label.setText(this.message);
+		label.setAutoscrolls(true);
+		label.setVerticalAlignment(JLabel.TOP);
+		label.setHorizontalAlignment(JLabel.CENTER);
+		this.add(label);
 		System.out.println(this.message);
 	}
 	

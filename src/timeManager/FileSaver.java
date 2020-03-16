@@ -1,26 +1,17 @@
 package timeManager;
 
-import java.awt.RenderingHints.Key;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.sql.Savepoint;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class FileSaver {
@@ -50,7 +41,6 @@ public class FileSaver {
 		jsonObject.put("table", table.getAllPlan());
 		
 		try {
-			//fileOutputStream.write(jsonObject.toString().getBytes());
 			writer.write(jsonObject.toString());
 		} catch (IOException e) {
 			System.out.println("Failed to save to the json file!");
@@ -124,6 +114,13 @@ public class FileSaver {
 			
 			System.out.println(key);
 			planMap.put(PlanTime.valueOf(key), value);
+		}
+		
+		try {
+			fileInputStream.close();
+		} catch (IOException e) {
+			System.out.println("Failed to close the file!");
+			this.setErrorString("Failed to close the file!");
 		}
 		
 		return planMap;

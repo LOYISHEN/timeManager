@@ -14,16 +14,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 import timeManager.PlanTime;
 import timeManager.TimeManager;
@@ -65,7 +61,7 @@ public class Window extends JFrame {
 			TrayIcon trayIcon = new TrayIcon(image, "TimeManager");
 			trayIcon.setImageAutoSize(true);
 			PopupMenu menu = new PopupMenu();
-			MenuItem exitMenuItem = new MenuItem("exit");
+			MenuItem exitMenuItem = new MenuItem("Exit");
 			exitMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					System.out.println("exit");
