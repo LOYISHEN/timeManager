@@ -20,10 +20,7 @@ import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import timeManager.PlanTime;
 import timeManager.TimeManager;
@@ -122,36 +119,88 @@ public class Window extends JFrame {
 		this.setIconImage(new ImageIcon("image/icon.png").getImage());
 		
 		//this.setLayout(new GridLayout(25, 8, 5, 5));
-		
-		JPanel containerPanel = new JPanel();
-		GridBagLayout containerGridLayout = new GridBagLayout();
+
+		JPanel containerPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints containerConstraints = new GridBagConstraints();
-		containerPanel.setLayout(containerGridLayout);
-		
+
+		// 时间panel
 		JPanel timePanel = new JPanel(new GridLayout());
 		timePanel.add(new JButton("timePanel"));
-		JPanel dayAndPlanPanel = new JPanel(new GridLayout());
-		dayAndPlanPanel.add(new JButton("dayAndPlanPanel"));
-		
+
+		// 星期几panel
+		JPanel dayPanel = new JPanel(new GridLayout(1, 7));
+		//dayPanel.add(new JButton("dayPanel"));
+
+		// 计划panel
+		JPanel planPanel = new JPanel(new GridLayout(1, 7));
+		//planPanel.add(new JButton("PlanPanel"));
+
 		containerConstraints.fill = GridBagConstraints.BOTH;
-		
+
+		// 星期几panel
 		containerConstraints.gridx = 1;
 		containerConstraints.gridy = 0;
-		containerConstraints.weightx = 7;
-		containerConstraints.weighty = 5;
-		containerConstraints.gridheight = 2;
-		containerPanel.add(dayAndPlanPanel, containerConstraints);
-		
+		containerConstraints.gridwidth = GridBagConstraints.REMAINDER;
+		containerConstraints.weightx = 15;
+		containerConstraints.weighty = 1;
+		containerPanel.add(dayPanel, containerConstraints);
+
+		// 时间panel
 		containerConstraints.gridx = 0;
 		containerConstraints.gridy = 1;
+		containerConstraints.gridwidth = 1;
 		containerConstraints.weightx = 1;
-		containerConstraints.weighty = 4;
-		containerConstraints.gridheight = 1;
+		containerConstraints.weighty = 15;
 		containerPanel.add(timePanel, containerConstraints);
-		
-		
+
+		// 计划panel
+		containerConstraints.gridx = 1;
+		containerConstraints.gridy = 1;
+		containerConstraints.gridwidth = GridBagConstraints.REMAINDER;
+		containerConstraints.weightx = 15;
+		containerConstraints.weighty = 15;
+		containerPanel.add(planPanel, containerConstraints);
+
 		this.add(containerPanel);
-		
+
+		String day[] = {"日", "一", "二", "三", "四", "五", "六"};
+		for (int i=0; i<7; i++) {
+			JLabel dayLabel = new JLabel("星期" + day[i]);
+			dayLabel.setHorizontalAlignment(JLabel.CENTER);
+			dayPanel.add(dayLabel);
+			planPanel.add(new JButton("day " + String.valueOf(i+1) + " plan"));
+		}
+
+//		this.setLayout(new GridBagLayout());
+//
+//		GridBagConstraints gridBagConstraints = new GridBagConstraints();
+//
+//		gridBagConstraints.fill = GridBagConstraints.BOTH;
+//
+//		gridBagConstraints.weightx = 1;
+//		gridBagConstraints.weighty = 1;
+//
+////		gridBagConstraints.gridx = 0;
+////		gridBagConstraints.gridy = 0;
+////		this.add(new JButton("1"), gridBagConstraints);
+//
+//		gridBagConstraints.gridx = 1;
+//		gridBagConstraints.gridy = 0;
+//		gridBagConstraints.gridheight = 2;
+//		gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+//		this.add(new JButton("2"), gridBagConstraints);
+//
+//		gridBagConstraints.gridx = 0;
+//		gridBagConstraints.gridy = 1;
+//		gridBagConstraints.gridheight = 1;
+//		gridBagConstraints.gridwidth = 1;
+//		this.add(new JButton("3"), gridBagConstraints);
+//
+////		gridBagConstraints.gridx = 1;
+////		gridBagConstraints.gridy = 1;
+////		this.add(new JButton("4"), gridBagConstraints);
+
+
 		Map<Integer, String> planMap = new HashMap<Integer, String>();
 		// 星期几
 		planMap.put(0, "");
