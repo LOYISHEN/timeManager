@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 public class FileSaver {
@@ -60,13 +62,13 @@ public class FileSaver {
 		
 		return true;
 	}
-	
-	public Map<PlanTime, String> read() {
-		Map<PlanTime, String> planMap = new HashMap<PlanTime, String>();
-		
+
+	public ArrayList<Plan> read() {
+		ArrayList<Plan> planArrayList = new ArrayList();
+
 		File file = new File(this.filename);
 		FileInputStream fileInputStream;
-		
+
 		try {
 			fileInputStream = new FileInputStream(file);
 		} catch (FileNotFoundException e) {
@@ -74,12 +76,12 @@ public class FileSaver {
 			this.setErrorString("Failed to open the json file!");
 			return null;
 		}
-		
+
 		Long fileLength = file.length();
 		byte[] b = new byte[fileLength.intValue()];
-		
+
 		String string = new String();
-		
+
 		try {
 			fileInputStream.read(b);
 		} catch (IOException e) {
@@ -87,7 +89,7 @@ public class FileSaver {
 			this.setErrorString("Failed to read the json file!");
 			return null;
 		}
-		
+
 		try {
 			string = new String(b, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -95,35 +97,40 @@ public class FileSaver {
 			System.out.println("unsupported encoding exception, FileSaver.java:read()");
 			return null;
 		}
-		
-		// 从string中载入jsonObject
-		JSONObject jsonObject = JSONObject.fromObject(string);
-		// 从json中载入table对象
-		jsonObject = jsonObject.getJSONObject("table");
-		
-		if ("null".equals(jsonObject.toString())) {
-			this.setErrorString("Failed to read table object!");
-			return null;
+
+		JSONObject jsonObject = null;
+		try {
+			// 从string中载入jsonObject
+			jsonObject = JSONObject.fromObject(string);
+			// 从json中载入table对象
+			jsonObject = jsonObject.getJSONObject("table");
+		} catch (JSONException e) {
+			System.out.println(e.getMessage());
 		}
-		
+
+		if (null == jsonObject || "null".equals(jsonObject.toString())) {
+			this.setErrorString("Failed to read table object!");
+			return planArrayList;
+		}
+
 		String key = new String();
 		String value = new String();
 		for (Iterator<?> iterator = jsonObject.keys(); iterator.hasNext();) {
 			key = (String)iterator.next();
 			value = jsonObject.getString(key.toString());
-			
-			System.out.println(key);
-			planMap.put(PlanTime.valueOf(key), value);
+
+			// 添加一条计划
+			planArrayList.add(new Plan(PlanTime.valueOf(key), value));
 		}
-		
+
 		try {
 			fileInputStream.close();
 		} catch (IOException e) {
 			System.out.println("Failed to close the file!");
 			this.setErrorString("Failed to close the file!");
 		}
-		
-		return planMap;
+
+		return planArrayList;
 	}
 	
 	// 提供给外部获取错误信息

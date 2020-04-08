@@ -17,11 +17,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.*;
 
+import timeManager.Plan;
 import timeManager.PlanTime;
 import timeManager.TimeManager;
 
@@ -43,7 +45,7 @@ public class Window extends JFrame {
 				setVisible(false);
 			}
 		});
-		this.setMinimumSize(new Dimension(1350, 750));
+		this.setMinimumSize(new Dimension(1024, 768));
 		
 		this.paintContent();
 		
@@ -55,7 +57,8 @@ public class Window extends JFrame {
 		Runnable popupManagerRunnable = new PopupManager(this.timeManager);
 		new Thread(popupManagerRunnable).start();
 	}
-	
+
+	// 添加系统托盘
 	private void addSystemTray(Image image) {
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
@@ -116,27 +119,24 @@ public class Window extends JFrame {
 	}
 	
 	private void paintContent() {
+		// 设置程序图标
 		this.setIconImage(new ImageIcon("image/icon.png").getImage());
-		
-		//this.setLayout(new GridLayout(25, 8, 5, 5));
 
+		// 容器panel
 		JPanel containerPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints containerConstraints = new GridBagConstraints();
-
 		// 时间panel
 		JPanel timePanel = new JPanel(new GridLayout());
-		timePanel.add(new JButton("timePanel"));
-
+		timePanel.add(new JLabel("timePanel"));
 		// 星期几panel
 		JPanel dayPanel = new JPanel(new GridLayout(1, 7));
 		//dayPanel.add(new JButton("dayPanel"));
-
 		// 计划panel
 		JPanel planPanel = new JPanel(new GridLayout(1, 7));
 		//planPanel.add(new JButton("PlanPanel"));
 
+		// 设置布局
 		containerConstraints.fill = GridBagConstraints.BOTH;
-
 		// 星期几panel
 		containerConstraints.gridx = 1;
 		containerConstraints.gridy = 0;
@@ -144,7 +144,6 @@ public class Window extends JFrame {
 		containerConstraints.weightx = 15;
 		containerConstraints.weighty = 1;
 		containerPanel.add(dayPanel, containerConstraints);
-
 		// 时间panel
 		containerConstraints.gridx = 0;
 		containerConstraints.gridy = 1;
@@ -152,7 +151,6 @@ public class Window extends JFrame {
 		containerConstraints.weightx = 1;
 		containerConstraints.weighty = 15;
 		containerPanel.add(timePanel, containerConstraints);
-
 		// 计划panel
 		containerConstraints.gridx = 1;
 		containerConstraints.gridy = 1;
@@ -161,74 +159,62 @@ public class Window extends JFrame {
 		containerConstraints.weighty = 15;
 		containerPanel.add(planPanel, containerConstraints);
 
+		// 窗口添加容器panel
 		this.add(containerPanel);
 
+		// 添加星期信息
 		String day[] = {"日", "一", "二", "三", "四", "五", "六"};
 		for (int i=0; i<7; i++) {
 			JLabel dayLabel = new JLabel("星期" + day[i]);
 			dayLabel.setHorizontalAlignment(JLabel.CENTER);
 			dayPanel.add(dayLabel);
-			planPanel.add(new JButton("day " + String.valueOf(i+1) + " plan"));
 		}
 
-//		this.setLayout(new GridBagLayout());
-//
-//		GridBagConstraints gridBagConstraints = new GridBagConstraints();
-//
-//		gridBagConstraints.fill = GridBagConstraints.BOTH;
-//
-//		gridBagConstraints.weightx = 1;
-//		gridBagConstraints.weighty = 1;
-//
-////		gridBagConstraints.gridx = 0;
-////		gridBagConstraints.gridy = 0;
-////		this.add(new JButton("1"), gridBagConstraints);
-//
-//		gridBagConstraints.gridx = 1;
-//		gridBagConstraints.gridy = 0;
-//		gridBagConstraints.gridheight = 2;
-//		gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
-//		this.add(new JButton("2"), gridBagConstraints);
-//
-//		gridBagConstraints.gridx = 0;
-//		gridBagConstraints.gridy = 1;
-//		gridBagConstraints.gridheight = 1;
-//		gridBagConstraints.gridwidth = 1;
-//		this.add(new JButton("3"), gridBagConstraints);
-//
-////		gridBagConstraints.gridx = 1;
-////		gridBagConstraints.gridy = 1;
-////		this.add(new JButton("4"), gridBagConstraints);
-
-
-		Map<Integer, String> planMap = new HashMap<Integer, String>();
-		// 星期几
-		planMap.put(0, "");
-		planMap.put(1, "星期天");
-		planMap.put(2, "星期一");
-		planMap.put(3, "星期二");
-		planMap.put(4, "星期三");
-		planMap.put(5, "星期四");
-		planMap.put(6, "星期五");
-		planMap.put(7, "星期六");
-		
-		// 时间
-		for (int i=0; i<24; i++) {
-			planMap.put((i+1)*8, String.valueOf(i));
+		// 7天的planPanel
+		JPanel[] dayPlanPanel = new JPanel[7];
+		for (int i=0; i<7; i++) {
+			dayPlanPanel[i] = new JPanel();
+			dayPanel.add(dayPlanPanel[i]);
 		}
-		
-		// 计划
-		int index;
-		String plan;
-		PlanTime planTime;
-		for (int row=0; row<24; row++) {
-			for (int column=0; column<7; column++) {
-				planTime = new PlanTime(column, row, 0);
-				index = (row + 1) * 8 + column + 1;
-				plan = this.timeManager.getPlan(planTime);
-				planMap.put(index, plan);
-			}
+
+		// 因为取计划的时候已经拍过序了，所以这里直接为对应的dayPlanPanel添加plan信息
+		for (int i=0; i<this.timeManager.getPlanSize(); i++) {
+			Plan plan = this.timeManager.getPlan(i);
+			int whichDay = plan.getTime().getDay();
+			//dayPlanPanel[whichDay].add();
 		}
+
+		//这里要把上面的两个循环改一下，完成最终的计划的显示
+
+//
+//		Map<Integer, String> planMap = new HashMap<Integer, String>();
+//		// 星期几
+//		planMap.put(0, "");
+//		planMap.put(1, "星期天");
+//		planMap.put(2, "星期一");
+//		planMap.put(3, "星期二");
+//		planMap.put(4, "星期三");
+//		planMap.put(5, "星期四");
+//		planMap.put(6, "星期五");
+//		planMap.put(7, "星期六");
+//
+//		// 时间
+//		for (int i=0; i<24; i++) {
+//			planMap.put((i+1)*8, String.valueOf(i));
+//		}
+//
+//		// 计划
+//		int index;
+//		String plan;
+//		PlanTime planTime;
+//		for (int row=0; row<24; row++) {
+//			for (int column=0; column<7; column++) {
+//				planTime = new PlanTime(column, row, 0);
+//				index = (row + 1) * 8 + column + 1;
+//				plan = this.timeManager.getPlan(planTime);
+//				planMap.put(index, plan);
+//			}
+//		}
 		
 		// 画组件
 //		for (int i=0; i<8*25; i++) {
