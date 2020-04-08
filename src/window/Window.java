@@ -177,7 +177,7 @@ public class Window extends JFrame {
 			dayPanel.add(dayPlanPanel[i]);
 		}
 
-		// 因为取计划的时候已经拍过序了，所以这里直接为对应的dayPlanPanel添加plan信息
+		// 因为取计划的时候已经排过序了，所以这里直接为对应的dayPlanPanel添加plan信息
 		for (int i=0; i<this.timeManager.getPlanSize(); i++) {
 			Plan plan = this.timeManager.getPlan(i);
 			int whichDay = plan.getTime().getDay();
