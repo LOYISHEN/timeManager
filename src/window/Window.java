@@ -1,7 +1,10 @@
 package window;
 
 import java.awt.AWTException;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.MenuItem;
@@ -20,6 +23,7 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import timeManager.PlanTime;
 import timeManager.TimeManager;
@@ -117,7 +121,36 @@ public class Window extends JFrame {
 	private void paintContent() {
 		this.setIconImage(new ImageIcon("image/icon.png").getImage());
 		
-		this.setLayout(new GridLayout(25, 8, 5, 5));
+		//this.setLayout(new GridLayout(25, 8, 5, 5));
+		
+		JPanel containerPanel = new JPanel();
+		GridBagLayout containerGridLayout = new GridBagLayout();
+		GridBagConstraints containerConstraints = new GridBagConstraints();
+		containerPanel.setLayout(containerGridLayout);
+		
+		JPanel timePanel = new JPanel(new GridLayout());
+		timePanel.add(new JButton("timePanel"));
+		JPanel dayAndPlanPanel = new JPanel(new GridLayout());
+		dayAndPlanPanel.add(new JButton("dayAndPlanPanel"));
+		
+		containerConstraints.fill = GridBagConstraints.BOTH;
+		
+		containerConstraints.gridx = 1;
+		containerConstraints.gridy = 0;
+		containerConstraints.weightx = 7;
+		containerConstraints.weighty = 5;
+		containerConstraints.gridheight = 2;
+		containerPanel.add(dayAndPlanPanel, containerConstraints);
+		
+		containerConstraints.gridx = 0;
+		containerConstraints.gridy = 1;
+		containerConstraints.weightx = 1;
+		containerConstraints.weighty = 4;
+		containerConstraints.gridheight = 1;
+		containerPanel.add(timePanel, containerConstraints);
+		
+		
+		this.add(containerPanel);
 		
 		Map<Integer, String> planMap = new HashMap<Integer, String>();
 		// 星期几
@@ -149,16 +182,16 @@ public class Window extends JFrame {
 		}
 		
 		// 画组件
-		for (int i=0; i<8*25; i++) {
-			JButton button = new JButton(planMap.get(i));
-			button.setName(String.valueOf(i));
-			button.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					planPress(button.getName(), button);
-				}
-			});
-			this.add(button);
-		}
+//		for (int i=0; i<8*25; i++) {
+//			JButton button = new JButton(planMap.get(i));
+//			button.setName(String.valueOf(i));
+//			button.addActionListener(new ActionListener() {
+//				public void actionPerformed(ActionEvent e) {
+//					planPress(button.getName(), button);
+//				}
+//			});
+//			this.add(button);
+//		}
 	}
 	
 	private void exit() {

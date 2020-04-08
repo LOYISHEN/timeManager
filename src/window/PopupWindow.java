@@ -13,6 +13,7 @@ public class PopupWindow extends JDialog implements Runnable {
 		this.delayTime = delayTime;
 		this.setUndecorated(true);
 		this.setSize(200, 200);
+		this.setAlwaysOnTop(true);
 		
 		this.paintContent();
 		
