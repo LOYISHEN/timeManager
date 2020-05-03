@@ -1,7 +1,10 @@
 package timeManager;
 
+import timeManager.Plan.Plan;
+import timeManager.Plan.PlanContent;
+import timeManager.Plan.PlanTime;
+
 import java.util.ArrayList;
-import java.util.Map;
 
 public class TimeManager {
 	// filename 为保存到的文件名
@@ -16,21 +19,21 @@ public class TimeManager {
 
 	// 根据索引获取某一个计划
 	public Plan getPlan(int index) {
-		return this.table.getPlan(index);
+		return this.table.getPlanContent(index);
 	}
 
 	// 根据时间获取计划
-	public String getPlan(PlanTime planTime) {
-		String plan = new String();
+	public PlanContent getPlan(PlanTime planTime) {
+		PlanContent planContent = new PlanContent();
+
+		planContent = this.table.getPlanContent(planTime);
 		
-		plan = this.table.getPlan(planTime);
-		
-		return plan;
+		return planContent;
 	}
 	
 	// 设置计划
-	public void setPlan(PlanTime time, String plan) {
-		this.table.setPlan(time, plan);
+	public void setPlan(PlanTime time, PlanContent planContent) {
+		this.table.setPlan(time, planContent);
 	}
 	
 	// 保存计划到文件中
@@ -41,16 +44,25 @@ public class TimeManager {
 	}
 	
 	// 从文件中读取计划
-	public void readFromFile() {
+	public boolean readFromFile() {
 		ArrayList<Plan> planArrayList = this.fileSaver.read();
 
-		if (0 == planArrayList.size()) { // 可能是第一次运行程序，这时写入一个空的计划表。以后要加上判断
+		// 判断读取配置文件是否有误
+		if (null == planArrayList) {
 			System.out.println(this.fileSaver.getErrorString());
+
+			// 出现错误时，保存一下数据再读进来
 			this.saveToFile();
 			planArrayList = this.fileSaver.read();
+
+			// 假如读入还是失败，就返回false
+			if (null == planArrayList) {
+				return false;
+			}
 		}
 
 		this.table.setAllPlan(planArrayList);
+		return true;
 	}
 	
 	// 输出计划列表，调试用

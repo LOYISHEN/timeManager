@@ -1,5 +1,7 @@
 package window;
 
+import timeManager.Plan.PlanContent;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +13,9 @@ import javax.swing.JDialog;
 import javax.swing.JTextArea;
 
 public class PlanEditWindow extends JDialog{
+	private JTextArea textArea;
+	private PlanContent planContent;
+
 	public PlanEditWindow(String title) {
 		this.setTitle(title);
 		this.setSize(200, 150);
@@ -46,22 +51,19 @@ public class PlanEditWindow extends JDialog{
 	}
 	
 	private void submit() {
-		String plan = this.textArea.getText();
+		PlanContent planContent = new PlanContent(this.textArea.getText());
 		System.out.println("submit");
-		System.out.println(plan);
-		this.plan = plan;
+		System.out.println(planContent);
+		this.planContent = planContent;
 		this.setVisible(false);
 	}
 	
-	public void setPlan(String plan) {
-		this.textArea.setText(plan);
-		this.plan = plan;
+	public void setPlan(PlanContent planContent) {
+		this.textArea.setText(planContent.toString());
+		this.planContent = planContent;
 	}
 	
-	public String getPlan() {
-		return this.plan;
+	public PlanContent getPlan() {
+		return this.planContent;
 	}
-	
-	private JTextArea textArea;
-	private String plan;
 }

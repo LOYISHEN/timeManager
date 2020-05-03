@@ -1,7 +1,6 @@
 package window;
 
 import java.awt.AWTException;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,23 +10,19 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.awt.event.*;
 
 import javax.swing.*;
 
-import timeManager.Plan;
-import timeManager.PlanTime;
+import timeManager.Plan.Plan;
+import timeManager.Plan.PlanContent;
+import timeManager.Plan.PlanTime;
 import timeManager.TimeManager;
 
 public class Window extends JFrame {
+	private TimeManager timeManager;
+	private PlanEditWindow planEditWindow;
+
 	public Window(String title, TimeManager timeManager) {
 		this.timeManager = timeManager;
 		this.planEditWindow = new PlanEditWindow("Edit plan");
@@ -52,7 +47,11 @@ public class Window extends JFrame {
 		GUITools.center(this);
 		
 		this.setVisible(true);
-		
+
+		// =============== 下面这条语句仅供测试 =================
+		//this.timeManager.setPlan(new PlanTime(), new PlanContent());
+		// =============== 上面这条语句仅供测试 =================
+
 		// 启动弹窗管理器
 		Runnable popupManagerRunnable = new PopupManager(this.timeManager);
 		new Thread(popupManagerRunnable).start();
@@ -64,6 +63,8 @@ public class Window extends JFrame {
 			SystemTray tray = SystemTray.getSystemTray();
 			TrayIcon trayIcon = new TrayIcon(image, "TimeManager");
 			trayIcon.setImageAutoSize(true);
+
+			// 添加一个右键菜单
 			PopupMenu menu = new PopupMenu();
 			MenuItem exitMenuItem = new MenuItem("Exit");
 			exitMenuItem.addActionListener(new ActionListener() {
@@ -77,42 +78,19 @@ public class Window extends JFrame {
 			try {
 				tray.add(trayIcon);
 			} catch (AWTException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			trayIcon.addMouseListener(new MouseListener() {
-				public void mouseReleased(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void mousePressed(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void mouseExited(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
+
+			// 左键单击显示窗口
+			trayIcon.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						setVisible(true);
 					}
 					// 下面这段用来测试的而已
-					if (e.getButton() == MouseEvent.BUTTON2) {
-						
-					}
+//					if (e.getButton() == MouseEvent.BUTTON2) {
+//
+//					}
 				}
 			});
 		}
@@ -177,12 +155,14 @@ public class Window extends JFrame {
 			dayPanel.add(dayPlanPanel[i]);
 		}
 
+		
+
 		// 因为取计划的时候已经排过序了，所以这里直接为对应的dayPlanPanel添加plan信息
-		for (int i=0; i<this.timeManager.getPlanSize(); i++) {
-			Plan plan = this.timeManager.getPlan(i);
-			int whichDay = plan.getTime().getDay();
-			//dayPlanPanel[whichDay].add();
-		}
+//		for (int i=0; i<this.timeManager.getPlanSize(); i++) {
+//			Plan plan = this.timeManager.getPlan(i);
+//			int whichDay = plan.getTime().getDay();
+//			//dayPlanPanel[whichDay].add();
+//		}
 
 		//这里要把上面的两个循环改一下，完成最终的计划的显示
 
@@ -227,6 +207,7 @@ public class Window extends JFrame {
 //			});
 //			this.add(button);
 //		}
+
 	}
 	
 	private void exit() {
@@ -249,13 +230,10 @@ public class Window extends JFrame {
 		this.planEditWindow.setVisible(true);
 		
 		// 写完计划后就获取计划
-		String newPlan =  this.planEditWindow.getPlan();
-		this.timeManager.setPlan(planTime, newPlan);
-		button.setText(this.timeManager.getPlan(planTime));
+		PlanContent newPlanContent =  this.planEditWindow.getPlan();
+		this.timeManager.setPlan(planTime, newPlanContent);
+		button.setText(this.timeManager.getPlan(planTime).toString());
 		// 保存计划
 		timeManager.saveToFile();
 	}
-	
-	private TimeManager timeManager;
-	private PlanEditWindow planEditWindow;
 }

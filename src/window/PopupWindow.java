@@ -1,5 +1,7 @@
 package window;
 
+import timeManager.Plan.PlanContent;
+
 import java.awt.Font;
 
 import javax.swing.JDialog;
@@ -7,9 +9,12 @@ import javax.swing.JLabel;
 
 // 右下角弹窗
 public class PopupWindow extends JDialog implements Runnable {
+	private PlanContent planContent;
+	private int delayTime;
+
 	// delayTime单位是毫秒
-	public PopupWindow(String message, int delayTime) {
-		this.message = message;
+	public PopupWindow(PlanContent planContent, int delayTime) {
+		this.planContent = planContent;
 		this.delayTime = delayTime;
 		this.setUndecorated(true);
 		this.setSize(200, 200);
@@ -24,12 +29,12 @@ public class PopupWindow extends JDialog implements Runnable {
 	private void paintContent() {
 		JLabel label = new JLabel();
 		label.setFont(new Font("宋体", Font.PLAIN, 40));
-		label.setText(this.message);
+		label.setText(this.planContent.toString());
 		label.setAutoscrolls(true);
 		label.setVerticalAlignment(JLabel.TOP);
 		label.setHorizontalAlignment(JLabel.CENTER);
 		this.add(label);
-		System.out.println(this.message);
+		System.out.println(this.planContent.toString());
 	}
 	
 	public void run() {
@@ -50,7 +55,4 @@ public class PopupWindow extends JDialog implements Runnable {
 		
 		this.dispose();
 	}
-	
-	private String message;
-	private int delayTime;
 }

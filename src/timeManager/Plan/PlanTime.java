@@ -1,4 +1,4 @@
-package timeManager;
+package timeManager.Plan;
 
 import java.util.Date;
 import java.util.Calendar;
