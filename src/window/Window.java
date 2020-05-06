@@ -1,19 +1,13 @@
 package window;
 
-import java.awt.AWTException;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
+import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.*;
 
+import com.sun.javaws.Main;
 import timeManager.Plan.Plan;
 import timeManager.Plan.PlanContent;
 import timeManager.Plan.PlanTime;
@@ -23,15 +17,24 @@ public class Window extends JFrame {
 	private TimeManager timeManager;
 	private PlanEditWindow planEditWindow;
 
+	private JPanel timePanel = null; // 时间panel
+	private JPanel planPanel = null; // 计划panel
+
+	private JPopupMenu planOperationPopupMenu = new JPopupMenu();
+
+	private Plan selectedPlan = null;
+
 	public Window(String title, TimeManager timeManager) {
 		this.timeManager = timeManager;
 		this.planEditWindow = new PlanEditWindow("Edit plan");
 		this.timeManager.readFromFile();
 		ImageIcon icon = new ImageIcon("icon.png");
 		Image image = icon.getImage();
-		this.setIconImage(image);
+		this.setIconImage(icon.getImage());
 		
 		this.addSystemTray(image); // 系统托盘
+
+		this.addMenu(); // 菜单
 		
 		this.setTitle(title);
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -48,9 +51,12 @@ public class Window extends JFrame {
 		
 		this.setVisible(true);
 
-		// =============== 下面这条语句仅供测试 =================
-		//this.timeManager.setPlan(new PlanTime(), new PlanContent());
-		// =============== 上面这条语句仅供测试 =================
+		// =============== 下面的语句仅供测试 =================
+//		this.timeManager.setPlan(new PlanTime(0, 8, 0), new PlanTime(0, 9, 40), new PlanContent());
+//		this.timeManager.setPlan(new PlanTime(0, 10, 0), new PlanTime(0, 11, 40), new PlanContent());
+//		this.timeManager.setPlan(new PlanTime(0, 14, 30), new PlanTime(0, 16, 10), new PlanContent());
+//		this.timeManager.setPlan(new PlanTime(0, 16, 20), new PlanTime(0, 17, 50), new PlanContent());
+		// =============== 上面的语句仅供测试 =================
 
 		// 启动弹窗管理器
 		Runnable popupManagerRunnable = new PopupManager(this.timeManager);
@@ -95,7 +101,92 @@ public class Window extends JFrame {
 			});
 		}
 	}
-	
+
+	// 增加计划
+	private void planAdd(PlanTime planTimeFrom, PlanTime planTimeTo, PlanContent planContent) {
+		this.planUpdate(planTimeFrom, planTimeTo, planContent);
+	}
+
+	// 更新计划
+	private void planUpdate(PlanTime planTimeFrom, PlanTime planTimeTo, PlanContent planContent) {
+		planEditWindow.setPlanTimeFrom(planTimeFrom);
+		planEditWindow.setPlanTimeTo(planTimeTo);
+		planEditWindow.setPlanContent(planContent);
+
+		planEditWindow.setVisible(true);
+
+		// 写完计划后就获取计划
+		PlanContent newPlanContent =  planEditWindow.getPlanContent();
+		PlanTime newPlanTimeFrom = planEditWindow.getPlanTimeForm();
+		PlanTime newPlanTimeTo = planEditWindow.getPlanTimeTo();
+
+		if (planTimeFrom != null && planTimeTo != null) {
+			timeManager.setPlan(newPlanTimeFrom, newPlanTimeTo, newPlanContent);
+			// 保存计划
+			timeManager.saveToFile();
+
+			updatePlanPanelShow();
+			updateTimePanelShow();
+		}
+	}
+
+	// 删除计划
+	private void planDelete(PlanTime planTimeFrom, PlanTime planTimeTo, PlanContent planContent) {
+		this.timeManager.deletePlan(new Plan(planTimeFrom, planTimeTo, planContent));
+		updatePlanPanelShow();
+		updateTimePanelShow();
+	}
+
+	// 增加菜单
+	private void addMenu() {
+		// ================ 窗口菜单 ================
+		JMenuBar menuBar = new JMenuBar();
+
+		JMenu menuOperation = new JMenu("操作");
+
+		JMenuItem menuNewPlan = new JMenuItem("新建计划");
+		menuNewPlan.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				planAdd(new PlanTime(), new PlanTime(), new PlanContent());
+			}
+		});
+
+		JMenuItem menuExit = new JMenuItem("退出");
+		menuExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				exit();
+			}
+		});
+
+		menuOperation.add(menuNewPlan);
+		menuOperation.addSeparator();
+		menuOperation.add(menuExit);
+
+		menuBar.add(menuOperation);
+
+		this.setJMenuBar(menuBar);
+
+
+		// ================ 弹出式菜单 ================
+		this.planOperationPopupMenu.setVisible(false);
+		JMenuItem popupUpdatePlanMenu = new JMenuItem("更新");
+		popupUpdatePlanMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				planUpdate(selectedPlan.getPlanTimeFrom(), selectedPlan.getPlanTimeTo(), selectedPlan.getPlanContent());
+			}
+		});
+		JMenuItem popupDeletePlanMenu = new JMenuItem("删除");
+		popupDeletePlanMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				planDelete(selectedPlan.getPlanTimeFrom(), selectedPlan.getPlanTimeTo(), selectedPlan.getPlanContent());
+			}
+		});
+		this.planOperationPopupMenu.add(popupUpdatePlanMenu);
+		this.planOperationPopupMenu.addSeparator();
+		this.planOperationPopupMenu.add(popupDeletePlanMenu);
+	}
+
+	// 画主要内容
 	private void paintContent() {
 		// 设置程序图标
 		this.setIconImage(new ImageIcon("image/icon.png").getImage());
@@ -104,13 +195,13 @@ public class Window extends JFrame {
 		JPanel containerPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints containerConstraints = new GridBagConstraints();
 		// 时间panel
-		JPanel timePanel = new JPanel(new GridLayout());
-		timePanel.add(new JLabel("timePanel"));
+		this.timePanel = new JPanel(new GridLayout());
+		this.timePanel.add(new JLabel("timePanel"));
 		// 星期几panel
 		JPanel dayPanel = new JPanel(new GridLayout(1, 7));
 		//dayPanel.add(new JButton("dayPanel"));
 		// 计划panel
-		JPanel planPanel = new JPanel(new GridLayout(1, 7));
+		this.planPanel = new JPanel(new GridLayout(1, 7));
 		//planPanel.add(new JButton("PlanPanel"));
 
 		// 设置布局
@@ -128,14 +219,14 @@ public class Window extends JFrame {
 		containerConstraints.gridwidth = 1;
 		containerConstraints.weightx = 1;
 		containerConstraints.weighty = 15;
-		containerPanel.add(timePanel, containerConstraints);
+		containerPanel.add(this.timePanel, containerConstraints);
 		// 计划panel
 		containerConstraints.gridx = 1;
 		containerConstraints.gridy = 1;
 		containerConstraints.gridwidth = GridBagConstraints.REMAINDER;
 		containerConstraints.weightx = 15;
 		containerConstraints.weighty = 15;
-		containerPanel.add(planPanel, containerConstraints);
+		containerPanel.add(this.planPanel, containerConstraints);
 
 		// 窗口添加容器panel
 		this.add(containerPanel);
@@ -148,92 +239,136 @@ public class Window extends JFrame {
 			dayPanel.add(dayLabel);
 		}
 
+		this.updatePlanPanelShow();
+		this.updateTimePanelShow();
+	}
+
+	// 更新时间panel的显示
+	private void updateTimePanelShow() {
+		// 先清除所有组件
+		timePanel.removeAll();
+
+
+	}
+
+	// 更新所有的计划的显示
+	private void updatePlanPanelShow() {
+		// 先清除所有组件
+		planPanel.removeAll();
+
 		// 7天的planPanel
 		JPanel[] dayPlanPanel = new JPanel[7];
 		for (int i=0; i<7; i++) {
-			dayPlanPanel[i] = new JPanel();
-			dayPanel.add(dayPlanPanel[i]);
+			dayPlanPanel[i] = new JPanel(null);
+			planPanel.add(dayPlanPanel[i]);
 		}
 
-		
+		// 排序
+		this.timeManager.sortAllPlan();
 
-		// 因为取计划的时候已经排过序了，所以这里直接为对应的dayPlanPanel添加plan信息
-//		for (int i=0; i<this.timeManager.getPlanSize(); i++) {
-//			Plan plan = this.timeManager.getPlan(i);
-//			int whichDay = plan.getTime().getDay();
-//			//dayPlanPanel[whichDay].add();
-//		}
+		// 二维数组，分星期几存储计划
+		ArrayList<ArrayList<Plan>> dayPlan = new ArrayList<ArrayList<Plan>>();
 
-		//这里要把上面的两个循环改一下，完成最终的计划的显示
+		// 计算位置
+		int t_index = 0; // 暂时用来索引技术
+		Plan t_plan = null; // 暂时用来记录Plan
+		PlanTime t_planTimeFrom = null; // 暂时用来记录开始PlanTime
+		PlanTime t_planTimeTo = null; // 暂时用来记录结束PlanTime
+		PlanTime maxPlanTime = new PlanTime(0, 0, 0);
+		PlanTime minPlanTime = new PlanTime(0, 23, 59);
+		for (int i=0; i<7; i++) {
+			dayPlan.add(new ArrayList<Plan>());
+			while ((t_plan = this.timeManager.getPlan(t_index)) != null && t_plan.getPlanTimeFrom().getDay() == i) {
 
-//
-//		Map<Integer, String> planMap = new HashMap<Integer, String>();
-//		// 星期几
-//		planMap.put(0, "");
-//		planMap.put(1, "星期天");
-//		planMap.put(2, "星期一");
-//		planMap.put(3, "星期二");
-//		planMap.put(4, "星期三");
-//		planMap.put(5, "星期四");
-//		planMap.put(6, "星期五");
-//		planMap.put(7, "星期六");
-//
-//		// 时间
-//		for (int i=0; i<24; i++) {
-//			planMap.put((i+1)*8, String.valueOf(i));
-//		}
-//
-//		// 计划
-//		int index;
-//		String plan;
-//		PlanTime planTime;
-//		for (int row=0; row<24; row++) {
-//			for (int column=0; column<7; column++) {
-//				planTime = new PlanTime(column, row, 0);
-//				index = (row + 1) * 8 + column + 1;
-//				plan = this.timeManager.getPlan(planTime);
-//				planMap.put(index, plan);
-//			}
-//		}
-		
-		// 画组件
-//		for (int i=0; i<8*25; i++) {
-//			JButton button = new JButton(planMap.get(i));
-//			button.setName(String.valueOf(i));
-//			button.addActionListener(new ActionListener() {
-//				public void actionPerformed(ActionEvent e) {
-//					planPress(button.getName(), button);
-//				}
-//			});
-//			this.add(button);
-//		}
+				t_planTimeFrom = t_plan.getPlanTimeFrom();
+				t_planTimeTo = t_plan.getPlanTimeTo();
 
+				// 更新最大最小时间
+				if (t_planTimeFrom.getHour() < minPlanTime.getHour()
+						|| t_planTimeFrom.getHour() == t_planTimeFrom.getHour() && t_planTimeFrom.getMinute() < minPlanTime.getMinute()) {
+					minPlanTime.setHour(t_planTimeFrom.getHour());
+					minPlanTime.setMinute(t_planTimeFrom.getMinute());
+				} else if (t_planTimeTo.getHour() > maxPlanTime.getHour()
+						|| t_planTimeTo.getHour() == maxPlanTime.getHour() && t_planTimeTo.getMinute() > maxPlanTime.getMinute()) {
+					maxPlanTime.setHour(t_planTimeTo.getHour());
+					maxPlanTime.setMinute(t_planTimeTo.getMinute());
+				}
+
+				// 添加记录到对应arraylist
+				dayPlan.get(i).add(t_plan);
+
+				t_index++;
+			}
+		}
+
+		// 最大时间与最小时间之间相差的分钟数
+		int minuteFromMinToMax = PlanTime.getMinuteBetween(minPlanTime, maxPlanTime);
+
+		//画时间panel，最上端显示最小时分，最下端显示最大时分
+
+
+		// 让窗口计算出前面的容器的大小
+		this.pack();
+
+		// 显示计划内容
+		for (int day=0; day<7; day++) {
+			for (Iterator<Plan> iterator = dayPlan.get(day).iterator(); iterator.hasNext(); ) {
+				Plan plan = iterator.next();
+				PlanTime planTimeFrom = plan.getPlanTimeFrom();
+				PlanTime planTimeTo = plan.getPlanTimeTo();
+
+				int containerWith = dayPlanPanel[planTimeFrom.getDay()].getWidth();
+				int containerHeight = dayPlanPanel[planTimeFrom.getDay()].getHeight();
+				int height = (int) ((float)containerHeight / (float)minuteFromMinToMax * PlanTime.getMinuteBetween(planTimeFrom, planTimeTo));
+				int y = (int) ((float)containerHeight / (float)minuteFromMinToMax * PlanTime.getMinuteBetween(minPlanTime, planTimeFrom));
+
+				JLabel label = new JLabel(plan.getPlanContent().getContent());
+				label.setSize(containerWith, height);
+				label.setLocation(0, y);
+				label.setHorizontalAlignment(JLabel.CENTER);
+				label.addMouseListener(new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						switch (e.getClickCount()) {
+							case 1:
+								// 右键单击
+								if (e.getButton() == MouseEvent.BUTTON3) {
+									selectedPlan = plan;
+									planOperationPopupMenu.show(label, e.getX(), e.getY());
+								}
+								break;
+
+							case 2:
+								// 左键双击
+								if (e.getButton() == MouseEvent.BUTTON1) {
+									planUpdate(plan.getPlanTimeFrom(), plan.getPlanTimeTo(), plan.getPlanContent());
+								}
+								break;
+
+							default:
+
+								break;
+						}
+					}
+
+					public void mouseEntered(MouseEvent e) {
+						// 增大字体
+						label.setFont(new Font(label.getFont().getFontName(), Font.BOLD, label.getFont().getSize() + 5));
+					}
+
+					public void mouseExited(MouseEvent e) {
+						// 减小字体
+						label.setFont(new Font(label.getFont().getFontName(), Font.PLAIN, label.getFont().getSize() - 5));
+					}
+				});
+
+				dayPlanPanel[planTimeFrom.getDay()].add(label);
+			}
+		}
 	}
-	
+
 	private void exit() {
 		this.timeManager.saveToFile();
 		this.dispose();
 		System.exit(0);
-	}
-	
-	private void planPress(String name, JButton button) {
-		int number = Integer.valueOf(name);
-		int row = number / 8 - 1;
-		int column = number % 8 - 1;
-		if (row < 0 || column < 0) {
-			System.out.println("not plan table");
-			return;
-		}
-		PlanTime planTime = new PlanTime(column, row, 0);
-		this.planEditWindow.setPlan(this.timeManager.getPlan(planTime));
-		
-		this.planEditWindow.setVisible(true);
-		
-		// 写完计划后就获取计划
-		PlanContent newPlanContent =  this.planEditWindow.getPlan();
-		this.timeManager.setPlan(planTime, newPlanContent);
-		button.setText(this.timeManager.getPlan(planTime).toString());
-		// 保存计划
-		timeManager.saveToFile();
 	}
 }

@@ -7,33 +7,42 @@ import timeManager.Plan.PlanTime;
 import java.util.ArrayList;
 
 public class TimeManager {
+	private Table table;
+	private FileSaver fileSaver;
+
 	// filename 为保存到的文件名
 	public TimeManager(String filename) {
 		this.table = new Table();
 		fileSaver = new FileSaver(filename);
 	}
 
-	public int getPlanSize() {
-		return this.table.getPlanSize();
+	public void deletePlan(Plan plan) {
+		this.table.deletePlan(plan);
 	}
 
 	// 根据索引获取某一个计划
 	public Plan getPlan(int index) {
-		return this.table.getPlanContent(index);
+		return this.table.getPlan(index);
 	}
 
 	// 根据时间获取计划
-	public PlanContent getPlan(PlanTime planTime) {
-		PlanContent planContent = new PlanContent();
+	public Plan getPlan(PlanTime planTime) {
+		return this.table.getPlan(planTime);
+	}
 
-		planContent = this.table.getPlanContent(planTime);
-		
-		return planContent;
+	// 对所有计划按照时间排序
+	public void sortAllPlan() {
+		this.table.sortAllPlan();
 	}
 	
 	// 设置计划
-	public void setPlan(PlanTime time, PlanContent planContent) {
-		this.table.setPlan(time, planContent);
+	public void setPlan(PlanTime timeFrom, PlanTime timeTo, PlanContent planContent) {
+		this.table.setPlan(timeFrom, timeTo, planContent);
+	}
+
+	// 获取时间队列的长度
+	public int getPlanListLength() {
+		return this.table.getPlanListLength();
 	}
 	
 	// 保存计划到文件中
@@ -69,7 +78,4 @@ public class TimeManager {
 	public String toString() {
 		return table.toString();
 	}
-	
-	private Table table;
-	private FileSaver fileSaver;
 }

@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.Calendar;
 
 public class PlanTime {
+	private int day; // 星期几 0为星期天，1为星期一，一直到星期六
+	private int hour; // 24小时制
+	private int minute;
+
 	public PlanTime() {
 		this.day = 0;
 		this.hour = 0;
@@ -78,19 +82,25 @@ public class PlanTime {
 	
 	public static PlanTime valueOf(String planTimeString) {
 		PlanTime planTime;
-		
-		String[] strings1 = planTimeString.split("-");
-		if (strings1.length < 2) {
+
+		int day, hour, minute;
+
+		try {
+			String[] strings1 = planTimeString.split("-");
+			if (strings1.length < 2) {
+				return null;
+			}
+			day = Integer.valueOf(strings1[0]);
+
+			String[] strings2 = strings1[1].split(":");
+			if (strings2.length < 2) {
+				return null;
+			}
+			hour = Integer.valueOf(strings2[0]);
+			minute = Integer.valueOf(strings2[1]);
+		} catch (NumberFormatException e) {
 			return null;
 		}
-		int day = Integer.valueOf(strings1[0]);
-		
-		String[] strings2 = strings1[1].split(":");
-		if (strings2.length < 2) {
-			return null;
-		}
-		int hour = Integer.valueOf(strings2[0]);
-		int minute = Integer.valueOf(strings2[1]);
 		
 		planTime = new PlanTime(day, hour, minute);
 		return planTime;
@@ -107,8 +117,15 @@ public class PlanTime {
 		
 		return new PlanTime(day, hour, minute);
 	}
-	
-	private int day; // 星期几 0为星期天，1为星期一，一直到星期六
-	private int hour; // 24小时制
-	private int minute;
+
+	// 判断在某一个时间是否在同一天的另外的两个时间之间，左闭右开
+	public static boolean isBetween(PlanTime targetTimeFrom, PlanTime targetTimeTo, PlanTime timeFrom, PlanTime timeTo) {
+		return targetTimeFrom.getHour() >= timeFrom.getHour() && targetTimeFrom.getMinute() >= timeFrom.getMinute()
+				&& targetTimeTo.getHour() < timeTo.getHour() && targetTimeTo.getMinute() < timeTo.getMinute();
+	}
+
+	// 获取同一天内两个时间之间的分钟数，假如to晚于from，将返回负数
+	public static int getMinuteBetween(PlanTime from, PlanTime to) {
+		return (to.getHour() - from.getHour()) * 60 + to.getMinute() - from.getMinute();
+	}
 }

@@ -135,26 +135,31 @@ public class FileSaver {
 
 		// 转换json对象为Plan类型对象
 		JSONObject obj = null;
-		JSONObject planTimeJSONObject = null;
+		JSONObject planTimeFromJSONObject = null;
+		JSONObject planTImeToJSONObject = null;
 		JSONObject planContentJSONObject = null;
 		for (Iterator<JSONObject> iterator = jsonArray.iterator(); iterator.hasNext(); ) {
 			// 假如有任何异常就直接跳过该记录
 			try {
 				obj = iterator.next();
-				planTimeJSONObject = obj.getJSONObject("time");
+				planTimeFromJSONObject = obj.getJSONObject("planTimeFrom");
+				planTImeToJSONObject = obj.getJSONObject("planTimeTo");
 				planContentJSONObject = obj.getJSONObject("planContent");
-			} catch (Exception e) {
+			} catch (JSONException e) {
 				System.out.println("exception in timeManager.read");
 				continue;
 			}
 
-			PlanTime planTime = new PlanTime(planTimeJSONObject.getInt("day"),
-												planTimeJSONObject.getInt("hour"),
-												planTimeJSONObject.getInt("minute"));
+			PlanTime planTimeFrom = new PlanTime(planTimeFromJSONObject.getInt("day"),
+												planTimeFromJSONObject.getInt("hour"),
+												planTimeFromJSONObject.getInt("minute"));
+			PlanTime planTimeTo = new PlanTime(planTImeToJSONObject.getInt("day"),
+												planTImeToJSONObject.getInt("hour"),
+												planTImeToJSONObject.getInt("minute"));
 			PlanContent planContent = new PlanContent(planContentJSONObject.getString("content"));
 
 			// 添加一条计划
-			planArrayList.add(new Plan(planTime, planContent));
+			planArrayList.add(new Plan(planTimeFrom, planTimeTo, planContent));
 			System.out.println(planArrayList.get(planArrayList.size()-1));
 		}
 
