@@ -19,6 +19,8 @@ public class PlanEditWindow extends JDialog{
 	private PlanTime planTimeFrom;
 	private PlanTime planTimeTo;
 
+	private boolean submitted = false;
+
 	public PlanEditWindow(String title) {
 		this.setTitle(title);
 		this.setSize(200, 150);
@@ -61,12 +63,21 @@ public class PlanEditWindow extends JDialog{
 	}
 	
 	private void submit() {
+		submitted = true;
 		this.planContent = new PlanContent(this.textAreaContent.getText());
 		this.planTimeFrom = PlanTime.valueOf(this.textAreaPlanTimeFrom.getText());
 		this.planTimeTo = PlanTime.valueOf(this.textAreaPlanTimeto.getText());
 		System.out.println("submit");
 		System.out.println(planContent);
 		this.setVisible(false);
+	}
+
+	public boolean Submitted() {
+		return this.submitted;
+	}
+
+	public void unableSubmit() {
+		this.submitted = false;
 	}
 	
 	public void setPlanContent(PlanContent planContent) {

@@ -39,15 +39,22 @@ public class Plan {
 		return " from " + this.planTimeFrom.toString() + " to " + this.planTimeTo.toString() + ":" + this.planContent;
 	}
 	
-	public boolean equals(Plan plan) {
-		if (plan == null) {
+	public boolean equals(Object anObject) {
+		if (anObject == null) {
 			return false;
-		} else if (plan == this) {
-			return true;
-		} else {
-			return plan.getPlanTimeFrom().toString().equals(this.getPlanTimeFrom().toString())
-					&& plan.getPlanTimeTo().toString().equals(this.planTimeTo.toString())
-					&& plan.getPlanContent().toString().equals(this.planContent.toString());
 		}
+
+		if (anObject == this) {
+			return true;
+		}
+
+		if (anObject.getClass() != this.getClass()) {
+			return false;
+		}
+
+		Plan plan = (Plan) anObject;
+		return plan.getPlanTimeFrom().toString().equals(this.getPlanTimeFrom().toString())
+				&& plan.getPlanTimeTo().toString().equals(this.planTimeTo.toString())
+				&& plan.getPlanContent().toString().equals(this.planContent.toString());
 	}
 }

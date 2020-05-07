@@ -20,9 +20,19 @@ public class Window extends JFrame {
 	private JPanel timePanel = null; // 时间panel
 	private JPanel planPanel = null; // 计划panel
 
+	// 右键选中计划时弹出来的菜单
 	private JPopupMenu planOperationPopupMenu = new JPopupMenu();
 
+	// 被右键选中的计划
 	private Plan selectedPlan = null;
+
+	// 窗口主容器
+	private JPanel containerPanel = new JPanel(new GridBagLayout());
+
+	// 最大的计划时间和最小的计划时间，用来确定区域大小
+	private PlanTime maxPlanTime = new PlanTime(0, 0, 0);
+	private PlanTime minPlanTime = new PlanTime(0, 23, 59);
+
 
 	public Window(String title, TimeManager timeManager) {
 		this.timeManager = timeManager;
@@ -44,6 +54,7 @@ public class Window extends JFrame {
 			}
 		});
 		this.setMinimumSize(new Dimension(1024, 768));
+		this.setResizable(false);
 		
 		this.paintContent();
 		
@@ -113,6 +124,7 @@ public class Window extends JFrame {
 		planEditWindow.setPlanTimeTo(planTimeTo);
 		planEditWindow.setPlanContent(planContent);
 
+		planEditWindow.unableSubmit(); // 必须先unable才能显示
 		planEditWindow.setVisible(true);
 
 		// 写完计划后就获取计划
@@ -120,21 +132,20 @@ public class Window extends JFrame {
 		PlanTime newPlanTimeFrom = planEditWindow.getPlanTimeForm();
 		PlanTime newPlanTimeTo = planEditWindow.getPlanTimeTo();
 
-		if (planTimeFrom != null && planTimeTo != null) {
+		if (planEditWindow.Submitted() && newPlanTimeFrom != null && newPlanTimeTo != null && !newPlanTimeFrom.equals(newPlanTimeTo)) {
 			timeManager.setPlan(newPlanTimeFrom, newPlanTimeTo, newPlanContent);
 			// 保存计划
 			timeManager.saveToFile();
 
-			updatePlanPanelShow();
-			updateTimePanelShow();
+			this.paintContent();
 		}
 	}
 
 	// 删除计划
 	private void planDelete(PlanTime planTimeFrom, PlanTime planTimeTo, PlanContent planContent) {
 		this.timeManager.deletePlan(new Plan(planTimeFrom, planTimeTo, planContent));
-		updatePlanPanelShow();
-		updateTimePanelShow();
+
+		this.paintContent();
 	}
 
 	// 增加菜单
@@ -188,14 +199,15 @@ public class Window extends JFrame {
 
 	// 画主要内容
 	private void paintContent() {
+
 		// 设置程序图标
 		this.setIconImage(new ImageIcon("image/icon.png").getImage());
 
 		// 容器panel
-		JPanel containerPanel = new JPanel(new GridBagLayout());
+		this.containerPanel.removeAll();
 		GridBagConstraints containerConstraints = new GridBagConstraints();
 		// 时间panel
-		this.timePanel = new JPanel(new GridLayout());
+		this.timePanel = new JPanel(null);
 		this.timePanel.add(new JLabel("timePanel"));
 		// 星期几panel
 		JPanel dayPanel = new JPanel(new GridLayout(1, 7));
@@ -248,7 +260,58 @@ public class Window extends JFrame {
 		// 先清除所有组件
 		timePanel.removeAll();
 
+		// 获取时间节点
+		ArrayList<PlanTime> planTimes = new ArrayList<PlanTime>();
+		PlanTime planTime = new PlanTime();
+		for (int i=0; i<this.timeManager.getPlanListLength(); i++) {
+			planTime = new PlanTime(this.timeManager.getPlan(i).getPlanTimeFrom());
+			planTime.setDay(0);
+			if (!planTimes.contains(planTime)) {
+				planTimes.add(planTime);
+			}
+			planTime = new PlanTime(this.timeManager.getPlan(i).getPlanTimeTo());
+			planTime.setDay(0);
+			if (!planTimes.contains(planTime)) {
+				planTimes.add(planTime);
+			}
+		}
 
+		// 排序
+		planTimes.sort((o1, o2) -> o1.getDay() == o2.getDay() ?
+				o1.getHour() == o2.getHour() ? o1.getMinute() - o2.getMinute()
+						: o1.getHour() - o2.getHour()
+				: o1.getDay() - o2.getDay());
+
+		// 重新计算容器大小
+		//this.pack();
+
+		int minuteFromMinToMax = PlanTime.getMinuteBetween(minPlanTime, maxPlanTime);
+		minuteFromMinToMax = minuteFromMinToMax==0 ? 10 : minuteFromMinToMax;
+
+		int containerWidth = this.timePanel.getWidth();
+		int containerHeight = this.timePanel.getHeight();
+
+		for (int i=0; i<planTimes.size(); i++) {
+			int height = 20;
+			int y;
+			if (0 == i) {
+				y = 0;
+			} else if (planTimes.size()-1 == i) {
+				y = containerHeight - 20;
+			} else {
+				y = (int) ((float)containerHeight / (float) minuteFromMinToMax * PlanTime.getMinuteBetween(minPlanTime, planTimes.get(i))) - 10;
+			}
+
+			int hour = planTimes.get(i).getHour();
+			int minute = planTimes.get(i).getMinute();
+			String sHour = hour > 9 ? String.valueOf(hour) : "0" + String.valueOf(hour);
+			String sMinute = minute > 9 ? String.valueOf(minute) : "0" + String.valueOf(minute);
+			JLabel label = new JLabel(sHour + ":" + sMinute + " ->");
+			label.setHorizontalAlignment(JLabel.RIGHT);
+			label.setSize(containerWidth, height);
+			label.setLocation(0, y);
+			this.timePanel.add(label);
+		}
 	}
 
 	// 更新所有的计划的显示
@@ -274,8 +337,8 @@ public class Window extends JFrame {
 		Plan t_plan = null; // 暂时用来记录Plan
 		PlanTime t_planTimeFrom = null; // 暂时用来记录开始PlanTime
 		PlanTime t_planTimeTo = null; // 暂时用来记录结束PlanTime
-		PlanTime maxPlanTime = new PlanTime(0, 0, 0);
-		PlanTime minPlanTime = new PlanTime(0, 23, 59);
+		this.maxPlanTime = new PlanTime(0, 0, 0);
+		this.minPlanTime = new PlanTime(0, 23, 59);
 		for (int i=0; i<7; i++) {
 			dayPlan.add(new ArrayList<Plan>());
 			while ((t_plan = this.timeManager.getPlan(t_index)) != null && t_plan.getPlanTimeFrom().getDay() == i) {
@@ -288,7 +351,8 @@ public class Window extends JFrame {
 						|| t_planTimeFrom.getHour() == t_planTimeFrom.getHour() && t_planTimeFrom.getMinute() < minPlanTime.getMinute()) {
 					minPlanTime.setHour(t_planTimeFrom.getHour());
 					minPlanTime.setMinute(t_planTimeFrom.getMinute());
-				} else if (t_planTimeTo.getHour() > maxPlanTime.getHour()
+				}
+				if (t_planTimeTo.getHour() > maxPlanTime.getHour()
 						|| t_planTimeTo.getHour() == maxPlanTime.getHour() && t_planTimeTo.getMinute() > maxPlanTime.getMinute()) {
 					maxPlanTime.setHour(t_planTimeTo.getHour());
 					maxPlanTime.setMinute(t_planTimeTo.getMinute());
@@ -303,9 +367,7 @@ public class Window extends JFrame {
 
 		// 最大时间与最小时间之间相差的分钟数
 		int minuteFromMinToMax = PlanTime.getMinuteBetween(minPlanTime, maxPlanTime);
-
-		//画时间panel，最上端显示最小时分，最下端显示最大时分
-
+		minuteFromMinToMax = minuteFromMinToMax==0 ? 10 : minuteFromMinToMax;
 
 		// 让窗口计算出前面的容器的大小
 		this.pack();
@@ -323,9 +385,12 @@ public class Window extends JFrame {
 				int y = (int) ((float)containerHeight / (float)minuteFromMinToMax * PlanTime.getMinuteBetween(minPlanTime, planTimeFrom));
 
 				JLabel label = new JLabel(plan.getPlanContent().getContent());
-				label.setSize(containerWith, height);
-				label.setLocation(0, y);
+				label.setSize(containerWith - 2, height - 2); // 为了添加一个缝隙
+				label.setLocation(1, y + 1); // 为了添加一个缝隙
 				label.setHorizontalAlignment(JLabel.CENTER);
+				label.setOpaque(true);
+				label.setBackground(new Color(128, 187, 198));
+
 				label.addMouseListener(new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
 						switch (e.getClickCount()) {
